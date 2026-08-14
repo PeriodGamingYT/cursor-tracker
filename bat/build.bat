@@ -130,7 +130,7 @@ SETLOCAL ENABLEDELAYEDEXPANSION
 		/I"!RootPath!\include" ^
 		/Fo"!RootPath!\obj\\" ^
 		/Fd"!RootPath!\obj\\" ^
-		/Fe"!RootPath!\obj\main.exe" ^
+		/Fe"!RootPath!\obj\cursor-tracker.exe" ^
 		!CompilerFlags! ^
 		!FilesToCompile! ^
 		!OtherArgs!
@@ -144,7 +144,9 @@ SETLOCAL ENABLEDELAYEDEXPANSION
 	)
 
 	MKDIR "!RootPath!\obj\result"
-	COPY "!RootPath!\obj\main.exe" "!RootPath!\obj\result\main.exe"
+	COPY ^
+		"!RootPath!\obj\cursor-tracker.exe" ^
+		"!RootPath!\obj\result\cursor-tracker.exe"
 
 	IF "!ShouldMakeAssetsFolder!" == "1" (
 		MKDIR "!RootPath!\obj\result\assets"

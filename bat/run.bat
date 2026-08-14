@@ -51,8 +51,8 @@ SETLOCAL ENABLEDELAYEDEXPANSION
 		EXIT /B 1
 	)
 
-	IF EXIST "!RootPath!\obj\result\main.exe" (
-		START "" "!RootPath!\obj\result\main.exe"
+	IF EXIST "!RootPath!\obj\result\cursor-tracker.exe" (
+		START "" "!RootPath!\obj\result\cursor-tracker.exe"
 	)
 CD "!StartPath!"
 ENDLOCAL

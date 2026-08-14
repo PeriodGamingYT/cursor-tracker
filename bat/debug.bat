@@ -74,10 +74,10 @@ SETLOCAL ENABLEDELAYEDEXPANSION
 		)
 	)
 
-	IF EXIST "!RootPath!\obj\result\main.exe" (
+	IF EXIST "!RootPath!\obj\result\cursor-tracker.exe" (
 		TASKLIST /FI "IMAGENAME eq !Debugger!" 2>NUL | FIND /I "!Debugger!" >NUL
 		IF "!ERRORLEVEL!" == "0" ( TASKKILL /F /IM !Debugger! )
-		START !Debugger! "!RootPath!\obj\result\main.exe"
+		START !Debugger! "!RootPath!\obj\result\cursor-tracker.exe"
 	)
 CD "!StartPath!"
 ENDLOCAL
