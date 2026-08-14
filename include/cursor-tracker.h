@@ -1,10 +1,6 @@
 #ifndef PROJECT_NAME_H
 #define PROJECT_NAME_H
 
-	//// Struct forward/unfilled declarations (N/A).
-	// ...
-
-
 	//// Base includes, defines, and typedefs (N/A).
 	#define WIN32_LEAN_AND_MEAN
 	#define COBJMACROS
@@ -42,13 +38,10 @@
 	// Misc. typedefs.
 	typedef uint8_t Bool;
 	typedef int Error;
-	typedef char FilePath[MAX_PATH];
 
-	// NOTE: This is only meant to keep track of what variables are on the heap
-	// versus the stack.
-	//
-	// NOTE: Usage is: MALLOC(type) variable, and
-	// MALLOC_JOIN(otherVariable, type) variable.
-	#define MALLOC(...) __VA_ARGS__
-	#define MALLOC_JOIN(joineeName, ...) __VA_ARGS__
+	typedef struct WindowState {
+		Bool isOpen;
+		HWND windowHandle;
+		HINSTANCE programHandle;
+	} WindowState;
 #endif
