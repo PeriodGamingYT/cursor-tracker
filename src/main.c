@@ -182,11 +182,11 @@ static void RemoveTrayIcon(WindowState *state) {
 
 int WINAPI WinMain(
 	HINSTANCE programHandle,
-	HINSTANCE legacyPrevAppHandle,
+	HINSTANCE legacyPrevProgramHandle,
 	LPSTR commandLine,
 	int windowShowFlags
 ) {
-	(void)(legacyPrevAppHandle);
+	(void)(legacyPrevProgramHandle);
 	(void)(commandLine);
 	(void)(windowShowFlags);
 
