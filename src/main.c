@@ -136,21 +136,22 @@ static LRESULT CALLBACK KeyboardProc(
 static LRESULT CALLBACK MouseProc(
 	int messageType, WPARAM extraMessage, LPARAM dataParam) {
 	if(
-		messageType != HC_ACTION || extraMessage != WM_MOUSEMOVE ||
-		!globalProcData.isShowingWindows
+		messageType != HC_ACTION || extraMessage != WM_MOUSEMOVE
 	) { goto end; }
 
 	MSLLHOOKSTRUCT *mouseEvent = (PMSLLHOOKSTRUCT)(dataParam);
 	POINT mousePos = mouseEvent->pt;
 	SetWindowPos(
 		globalProcData.horizWindowState->windowHandle, HWND_TOPMOST,
-		GetSystemMetrics(SM_XVIRTUALSCREEN), mousePos.y,
+		GetSystemMetrics(SM_XVIRTUALSCREEN),
+		mousePos.y - (WINDOW_THICKNESS / 2),
 		GetSystemMetrics(SM_CXVIRTUALSCREEN), WINDOW_THICKNESS,
 		0);
 
 	SetWindowPos(
 		globalProcData.vertWindowState->windowHandle, HWND_TOPMOST,
-		mousePos.x, GetSystemMetrics(SM_YVIRTUALSCREEN),
+		mousePos.x - (WINDOW_THICKNESS / 2),
+		GetSystemMetrics(SM_YVIRTUALSCREEN),
 		WINDOW_THICKNESS, GetSystemMetrics(SM_CYVIRTUALSCREEN),
 		0);
 
