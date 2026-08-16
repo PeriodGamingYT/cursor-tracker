@@ -113,7 +113,6 @@ static LRESULT CALLBACK KeyboardProc(
 	KBDLLHOOKSTRUCT *keyboardEvent = (PKBDLLHOOKSTRUCT)(dataParam);
 	DWORD virtKeyCode = keyboardEvent->vkCode;
 	switch(virtKeyCode) {
-	case VK_ESCAPE: { PostQuitMessage(0); return 0; }
 	case VK_RCONTROL: {
 		Bool isKeyUp = extraMessage == WM_KEYUP || extraMessage == WM_SYSKEYUP;
 		globalProcData.isShowingWindows = !isKeyUp;
@@ -169,7 +168,6 @@ static void AddTrayIcon(WindowState *state, HICON icon) {
 	};
 
 	strcpy(notifyIconData.szTip, "Right click to quit program");
-
 	Shell_NotifyIconA(NIM_ADD, &notifyIconData);
 }
 
