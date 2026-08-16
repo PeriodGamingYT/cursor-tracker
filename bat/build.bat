@@ -115,12 +115,14 @@ SETLOCAL ENABLEDELAYEDEXPANSION
 	)
 
 	SET FilesToCompile=
-	FOR /F "delims=" %%x IN ('DIR /B /S "!RootPath!\src"') DO (
+	FOR /F "delims=" %%x IN ('DIR /B /S "!RootPath!\src\*.c"') DO (
 		SET FilesToCompile=!FilesToCompile! "%%x"
 	)
 
 	DEL /F /S /Q "!RootPath!\obj" >NUL 2>&1
 	MKDIR "!RootPath!\obj"
+
+	RC /R /FO "!RootPath!\obj\main.res" "!RootPath!\src\main.rc"
 
 	REM I hate this idiom(?) in CL, but if a command line option can take a
 	REM file or directory, any input given to it that lacks two backslashes
@@ -132,7 +134,7 @@ SETLOCAL ENABLEDELAYEDEXPANSION
 		/Fd"!RootPath!\obj\\" ^
 		/Fe"!RootPath!\obj\cursor-tracker.exe" ^
 		!CompilerFlags! ^
-		!FilesToCompile! ^
+		"!RootPath!\obj\main.res" !FilesToCompile! ^
 		!OtherArgs!
 
 	IF %ERRORLEVEL% NEQ 0 (

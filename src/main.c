@@ -1,14 +1,22 @@
 #include <cursor-tracker.h>
 
+// REMARK: No way to pass in user data in hook events :(.
+#define WINDOW_THICKNESS 16
+#define USER_MESSAGE_TRAY_ICON (WM_USER + 1)
+struct {
+	WindowState *vertWindowState, *horizWindowState;
+	HBRUSH *windowColorBrush;
+	Bool isShowingWindows;
+} globalProcData;
+
 static void DebugHit() {
 	MessageBoxA(NULL, "Hit!", "Hit!", MB_OK | MB_ICONINFORMATION);
 }
 
-// REMARK: No way to pass in user data in hook events :(.
-struct {
-	WindowState *vertWindowState, *horizWindowState;
-	HBRUSH *windowColorBrush;
-} globalProcData;
+static void QuitProgram(WindowState *state) {
+	state->isOpen = FALSE;
+	PostQuitMessage(0);
+}
 
 static LRESULT CALLBACK WindowProc(
 	HWND windowHandle,
@@ -19,9 +27,16 @@ static LRESULT CALLBACK WindowProc(
 
 	switch(messageType) {
 	case WM_CREATE: { return 0; }
+
+	case USER_MESSAGE_TRAY_ICON: {
+		if(LOWORD(dataParam) == WM_RBUTTONUP) {
+			QuitProgram(state);
+			return 0;
+		}
+	} break;
+
 	case WM_DESTROY: {
-		state->isOpen = FALSE;
-		PostQuitMessage(0);
+		QuitProgram(state);
 		return 0;
 	}
 
@@ -101,6 +116,8 @@ static LRESULT CALLBACK KeyboardProc(
 	case VK_ESCAPE: { PostQuitMessage(0); return 0; }
 	case VK_RCONTROL: {
 		Bool isKeyUp = extraMessage == WM_KEYUP || extraMessage == WM_SYSKEYUP;
+		globalProcData.isShowingWindows = !isKeyUp;
+
 		int showWindowFlags = isKeyUp ? SW_HIDE : SW_NORMAL;
 		ShowWindow(
 			globalProcData.vertWindowState->windowHandle, showWindowFlags);
@@ -117,35 +134,52 @@ static LRESULT CALLBACK KeyboardProc(
 	}
 }
 
-#define WINDOW_THICKNESS 16
 static LRESULT CALLBACK MouseProc(
 	int messageType, WPARAM extraMessage, LPARAM dataParam) {
 	if(
-		messageType != HC_ACTION || extraMessage != WM_MOUSEMOVE
+		messageType != HC_ACTION || extraMessage != WM_MOUSEMOVE ||
+		!globalProcData.isShowingWindows
 	) { goto end; }
 
 	MSLLHOOKSTRUCT *mouseEvent = (PMSLLHOOKSTRUCT)(dataParam);
 	POINT mousePos = mouseEvent->pt;
-
-	// Horiz.
-	int screenX = GetSystemMetrics(SM_XVIRTUALSCREEN);
-	int screenSizeX = GetSystemMetrics(SM_CXVIRTUALSCREEN);
 	SetWindowPos(
 		globalProcData.horizWindowState->windowHandle, HWND_TOPMOST,
-		screenX, mousePos.y, screenSizeX, WINDOW_THICKNESS,
+		GetSystemMetrics(SM_XVIRTUALSCREEN), mousePos.y,
+		GetSystemMetrics(SM_CXVIRTUALSCREEN), WINDOW_THICKNESS,
 		0);
 
-	// Vert.
-	int screenY = GetSystemMetrics(SM_YVIRTUALSCREEN);
-	int screenSizeY = GetSystemMetrics(SM_CYVIRTUALSCREEN);
 	SetWindowPos(
 		globalProcData.vertWindowState->windowHandle, HWND_TOPMOST,
-		mousePos.x, screenY, WINDOW_THICKNESS, screenSizeY,
+		mousePos.x, GetSystemMetrics(SM_YVIRTUALSCREEN),
+		WINDOW_THICKNESS, GetSystemMetrics(SM_CYVIRTUALSCREEN),
 		0);
 
 	end: {
 		return CallNextHookEx(NULL, messageType, extraMessage, dataParam);
 	}
+}
+
+static void AddTrayIcon(WindowState *state, HICON icon) {
+	NOTIFYICONDATAA notifyIconData = {
+		.cbSize = sizeof(NOTIFYICONDATAA), .hWnd = state->windowHandle,
+		.hIcon = icon,
+		.uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP,
+		.uCallbackMessage = USER_MESSAGE_TRAY_ICON
+	};
+
+	strcpy(notifyIconData.szTip, "Right click to quit program");
+
+	Shell_NotifyIconA(NIM_ADD, &notifyIconData);
+}
+
+static void RemoveTrayIcon(WindowState *state) {
+	NOTIFYICONDATAA notifyIconData = {
+		.cbSize = sizeof(NOTIFYICONDATAA), .hWnd = state->windowHandle,
+		.hWnd = state->windowHandle
+	};
+
+	Shell_NotifyIconA(NIM_DELETE, &notifyIconData);
 }
 
 int WINAPI WinMain(
@@ -177,11 +211,18 @@ int WINAPI WinMain(
 		WH_KEYBOARD_LL, KeyboardProc, NULL, 0);
 
 	HHOOK mouseHook = SetWindowsHookExA(WH_MOUSE_LL, MouseProc, NULL, 0);
+	AddTrayIcon(
+		&horizWindowState, (HICON)(LoadImageA(
+			GetModuleHandle(NULL), MAKEINTRESOURCEA(1),
+			IMAGE_ICON,
+			GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON),
+			LR_SHARED)));
 		MSG message = { 0 };
 		while(GetMessage(&message, NULL, 0, 0) > 0) {
 			TranslateMessage(&message);
 			DispatchMessage(&message);
 		}
+	RemoveTrayIcon(&horizWindowState);
 	UnhookWindowsHookEx(mouseHook);
 	UnhookWindowsHookEx(keyboardHook);
 	DeinitWindowState(&horizWindowState);

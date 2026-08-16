@@ -9,6 +9,7 @@
 	#include <winternl.h>
 	#include <shlobj.h>
 	#include <shobjidl.h>
+	#include <shellapi.h>
 
 	#include <intrin.h>
 
@@ -30,9 +31,9 @@
 		(sizeof(_array) / sizeof((_array)[0]))
 
 	#ifdef DEBUG_MODE
-		#define DEBUG_CRASH(...) __debugbreak()
+		#define DEBUG_BREAK(...) __debugbreak()
 	#else
-		#define DEBUG_CRASH(...) OutputDebugStringA("DEBUG_CRASH at " __FILE__)
+		#define DEBUG_BREAK(...) OutputDebugStringA("DEBUG_BREAK at " __FILE__)
 	#endif
 
 	// Misc. typedefs.
